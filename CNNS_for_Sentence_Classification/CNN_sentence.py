@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class CNN(nn.Module):
-    def __init__(self, batch ,vocab_size, length ,input_size): 
+    def __init__(self, batch ,vocab_size, length ,input_size):
         super(CNN, self).__init__()
 
         # embedding_dim
