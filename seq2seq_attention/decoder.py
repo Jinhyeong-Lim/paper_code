@@ -1,8 +1,10 @@
 import torch
 import torch.nn as nn
 
+
 class Decoder(nn.Module):
-    def __init__(self, output_dim, embed_dim, enc_hidden_dim, dec_hidden_dim, dropout_ratio, attention):
+    def __init__(self, output_dim, embed_dim, enc_hidden_dim, dec_hidden_dim,
+                 dropout_ratio, attention):
         super().__init__()
 
         self.output_dim = output_dim
@@ -15,7 +17,8 @@ class Decoder(nn.Module):
         self.rnn = nn.GRU((enc_hidden_dim * 2) + embed_dim, dec_hidden_dim)
 
         # FC 레이어
-        self.fc_out = nn.Linear((enc_hidden_dim * 2) + dec_hidden_dim + embed_dim, output_dim)
+        self.fc_out = nn.Linear((enc_hidden_dim * 2) + dec_hidden_dim +
+                                embed_dim, output_dim)
 
         # 드롭아웃(dropout)
         self.dropout = nn.Dropout(dropout_ratio)
@@ -43,13 +46,14 @@ class Decoder(nn.Module):
 
         weighted = torch.bmm(attention, enc_outputs)
         # weighted: [배치 크기, 1, 인코더 히든 차원 * 방향의 수]
-        # bmm: batch matrix multiplication [Batch, n,m] * [Batch, m, p] = [Batch, n, p]
+        # bmm: [Batch, n,m] * [Batch, m, p] = [Batch, n, p]
 
         weighted = weighted.permute(1, 0, 2)
         # weighted: [1, 배치 크기, 인코더 히든 차원 * 방향의 수]
 
         rnn_input = torch.cat((embedded, weighted), dim=2)
-        # rnn_input: [1, 배치 크기, 인코더 히든 차원 * 방향의 수 + embed_dim]: 어텐션이 적용된 현재 단어 입력 정보
+        # rnn_input: [1, 배치 크기, 인코더 히든 차원 * 방향의 수 + embed_dim]
+        # 어텐션이 적용된 현재 단어 입력 정보
 
         output, hidden = self.rnn(rnn_input, hidden.unsqueeze(0))
         # output: [단어 개수, 배치 크기, 디코더 히든 차원 * 방향의 수]

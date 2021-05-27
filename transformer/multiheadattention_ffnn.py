@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+
 class MultiHeadAttentionLayer(nn.Module):
     def __init__(self, hidden_dim, n_heads, dropout_ratio, device):
         super().__init__()
@@ -32,9 +33,9 @@ class MultiHeadAttentionLayer(nn.Module):
         # key: [batch_size, key_len, hidden_dim]
         # value: [batch_size, value_len, hidden_dim]
 
-        Q = self.fc_q(query)
-        K = self.fc_k(key)
-        V = self.fc_v(value)
+        q = self.fc_q(query)
+        k = self.fc_k(key)
+        v = self.fc_v(value)
 
         # Q: [batch_size, query_len, hidden_dim]
         # K: [batch_size, key_len, hidden_dim]
@@ -42,16 +43,19 @@ class MultiHeadAttentionLayer(nn.Module):
 
         # hidden_dim → n_heads X head_dim
         # n_heads(h)개의 서로 다른 어텐션(attention) 컨셉을 학습하도록 유도
-        Q = Q.view(batch_size, -1, self.n_heads, self.head_dim).permute(0, 2, 1, 3)
-        K = K.view(batch_size, -1, self.n_heads, self.head_dim).permute(0, 2, 1, 3)
-        V = V.view(batch_size, -1, self.n_heads, self.head_dim).permute(0, 2, 1, 3)
+        q = q.view(batch_size, -1, self.n_heads,
+                   self.head_dim).permute(0, 2, 1, 3)
+        k = k.view(batch_size, -1, self.n_heads,
+                   self.head_dim).permute(0, 2, 1, 3)
+        v = v.view(batch_size, -1, self.n_heads,
+                   self.head_dim).permute(0, 2, 1, 3)
 
         # Q: [batch_size, n_heads, query_len, head_dim]
         # K: [batch_size, n_heads, key_len, head_dim]
         # V: [batch_size, n_heads, value_len, head_dim]
 
         # Attention Energy 계산
-        energy = torch.matmul(Q, K.permute(0, 1, 3, 2)) / self.scale
+        energy = torch.matmul(q, k.permute(0, 1, 3, 2)) / self.scale
 
         # energy: [batch_size, n_heads, query_len, key_len]
 

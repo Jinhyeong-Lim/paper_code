@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import random
 
+
 class Seq2Seq(nn.Module):
     def __init__(self, encoder, decoder):
         super().__init__()
@@ -26,7 +27,7 @@ class Seq2Seq(nn.Module):
         # 출력 차원
         trg_vocab_size = self.decoder.output_dim
 
-        #모든 값이 0인 [trg_len, batch_size, trg_vocab_size] 크기의 tensor 생성
+        # 모든 값이 0인 [trg_len, batch_size, trg_vocab_size] 크기의 tensor 생성
         outputs = torch.zeros(trg_len, batch_size, trg_vocab_size)
 
         # 첫 번째 입력은 항상 <sos> 토큰
@@ -45,3 +46,4 @@ class Seq2Seq(nn.Module):
             input = trg[t] if teacher_force else top1
 
         return outputs
+    

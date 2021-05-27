@@ -2,8 +2,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class CNN(nn.Module):
-    def __init__(self, batch ,vocab_size, length ,input_size):
+    def __init__(self, batch, vocab_size, length, input_size):
         super(CNN, self).__init__()
 
         # embedding_dim
@@ -16,13 +17,13 @@ class CNN(nn.Module):
         self.embedding_layer = nn.Embedding(num_embeddings=vocab_size,
                                             embedding_dim=input_size)
         # kernerl_size(3*input_size), ouput_channel=1
-        self.conv3 = nn.Conv2d(1, 100, (3, input_size),bias=True)
+        self.conv3 = nn.Conv2d(1, 100, (3, input_size), bias=True)
 
         # kernerl_size(4*input_size), ouput_channel=1
-        self.conv4 = nn.Conv2d(1, 100, (4, input_size),bias=True)
+        self.conv4 = nn.Conv2d(1, 100, (4, input_size), bias=True)
 
         # kernerl_size(5*input_size), ouput_channel=1
-        self.conv5 = nn.Conv2d(1, 100, (5, input_size),bias=True)
+        self.conv5 = nn.Conv2d(1, 100, (5, input_size), bias=True)
 
         # pooling(length-3+1)값 중 max 값
         self.Max3_pool = nn.MaxPool2d((length - 3 + 1, 1))
