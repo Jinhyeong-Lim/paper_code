@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+
 class Transformer(nn.Module):
     def __init__(self, encoder, decoder, src_pad_idx, trg_pad_idx, device):
         super().__init__()
@@ -37,7 +38,8 @@ class Transformer(nn.Module):
         """
 
         # trg_sub_mask: [trg_len, trg_len]
-        trg_sub_mask = torch.tril(torch.ones((trg_len, trg_len), device=self.device)).bool()
+        trg_sub_mask = torch.tril(torch.ones((trg_len, trg_len),
+                                             device=self.device)).bool()
 
         # trg_mask: [batch_size, 1, trg_len, trg_len]
         trg_mask = trg_pad_mask & trg_sub_mask

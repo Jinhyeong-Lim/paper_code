@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
-from MultiHeadAttention_FFNN import MultiHeadAttentionLayer, PositionwiseFeedforwardLayer
+from MultiHeadAttention_FFNN import MultiHeadAttentionLayer
+from MultiHeadAttention_FFNN import PositionwiseFeedforwardLayer
+
 
 class DecoderLayer(nn.Module):
     def __init__(self, hidden_dim, n_heads, pf_dim, dropout_ratio, device):
@@ -9,9 +11,12 @@ class DecoderLayer(nn.Module):
         self.self_attn_layer_norm = nn.LayerNorm(hidden_dim)
         self.enc_attn_layer_norm = nn.LayerNorm(hidden_dim)
         self.ff_layer_norm = nn.LayerNorm(hidden_dim)
-        self.self_attention = MultiHeadAttentionLayer(hidden_dim, n_heads, dropout_ratio, device)
-        self.encoder_attention = MultiHeadAttentionLayer(hidden_dim, n_heads, dropout_ratio, device)
-        self.positionwise_feedforward = PositionwiseFeedforwardLayer(hidden_dim, pf_dim, dropout_ratio)
+        self.self_attention = MultiHeadAttentionLayer(hidden_dim, n_heads,
+                                                      dropout_ratio, device)
+        self.encoder_attention = MultiHeadAttentionLayer(hidden_dim, n_heads,
+                                                         dropout_ratio, device)
+        self.positionwise_feedforward = PositionwiseFeedforwardLayer(
+            hidden_dim, pf_dim, dropout_ratio)
         self.dropout = nn.Dropout(dropout_ratio)
 
     def forward(self, trg, enc_src, trg_mask, src_mask):
@@ -31,7 +36,8 @@ class DecoderLayer(nn.Module):
 
         # encoder attention
         # 디코더의 쿼리(Query)를 이용해 인코더를 어텐션(attention)
-        _trg, attention = self.encoder_attention(trg, enc_src, enc_src, src_mask)
+        _trg, attention = self.encoder_attention(trg, enc_src, enc_src,
+                                                 src_mask)
 
         # dropout, residual connection and layer norm
 
@@ -51,14 +57,16 @@ class DecoderLayer(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, output_dim, hidden_dim, n_layers, n_heads, pf_dim, dropout_ratio, device, max_length=100):
+    def __init__(self, output_dim, hidden_dim, n_layers, n_heads, pf_dim,
+                 dropout_ratio, device, max_length=100):
         super().__init__()
 
         self.device = device
         self.tok_embedding = nn.Embedding(output_dim, hidden_dim)
         self.pos_embedding = nn.Embedding(max_length, hidden_dim)
         self.layers = nn.ModuleList(
-            [DecoderLayer(hidden_dim, n_heads, pf_dim, dropout_ratio, device) for _ in range(n_layers)])
+            [DecoderLayer(hidden_dim, n_heads, pf_dim, dropout_ratio, device)
+             for _ in range(n_layers)])
         self.fc_out = nn.Linear(hidden_dim, output_dim)
         self.dropout = nn.Dropout(dropout_ratio)
         self.scale = torch.sqrt(torch.FloatTensor([hidden_dim])).to(device)
@@ -73,10 +81,12 @@ class Decoder(nn.Module):
         trg_len = trg.shape[1]
 
         # pos: [batch_size, trg_len]
-        pos = torch.arange(0, trg_len).unsqueeze(0).repeat(batch_size, 1).to(self.device)
+        pos = torch.arange(0, trg_len).unsqueeze(0).repeat(batch_size, 1)
+        pos.to(self.device)
 
         # trg: [batch_size, trg_len, hidden_dim]
-        trg = self.dropout((self.tok_embedding(trg) * self.scale) + self.pos_embedding(pos))
+        trg = self.dropout((self.tok_embedding(trg) * self.scale)
+                           + self.pos_embedding(pos))
 
         for layer in self.layers:
             # 소스 마스크와 타겟 마스크 모두 사용
